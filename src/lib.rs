@@ -51,6 +51,15 @@ impl<T: fmt::Display> fmt::Display for NotPositive<T> {
 
 impl<T: fmt::Display + fmt::Debug> std::error::Error for NotPositive<T> {}
 
+impl<T> PartialEq<T> for Positive<T>
+where
+    T: PartialEq<T>,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.0.eq(other)
+    }
+}
+
 /////////////////
 // Negative<T> //
 /////////////////
@@ -100,6 +109,15 @@ impl<T: fmt::Display> fmt::Display for NotNegative<T> {
 }
 
 impl<T: fmt::Display + fmt::Debug> std::error::Error for NotNegative<T> {}
+
+impl<T> PartialEq<T> for Negative<T>
+where
+    T: PartialEq<T>,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.0.eq(other)
+    }
+}
 
 ////////////////////////////////
 // Positive<T> +  Positive<T> //
