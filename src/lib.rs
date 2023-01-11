@@ -120,19 +120,19 @@ where
 }
 
 ////////////////////////////////
-// Positive<T> +  Positive<T> //
-// Positive<T> *  Positive<T> //
-// Positive<T> += Positive<T> //
-// Positive<T> *= Positive<T> //
+// Positive<T> +  Positive<U> //
+// Positive<T> *  Positive<U> //
+// Positive<T> += Positive<U> //
+// Positive<T> *= Positive<U> //
 ////////////////////////////////
 
-impl<T> ops::Add<Self> for Positive<T>
+impl<T, U> ops::Add<Positive<U>> for Positive<T>
 where
-    T: ops::Add<T, Output = T>,
+    T: ops::Add<U, Output = T>,
 {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self::Output {
+    fn add(self, rhs: Positive<U>) -> Self::Output {
         // - self is positive
         // - rhs is positive
         // - adding two positive integers will result in a positive integer
@@ -140,13 +140,13 @@ where
     }
 }
 
-impl<T> ops::Mul<Self> for Positive<T>
+impl<T, U> ops::Mul<Positive<U>> for Positive<T>
 where
-    T: ops::Mul<T, Output = T>,
+    T: ops::Mul<U, Output = T>,
 {
     type Output = Self;
 
-    fn mul(self, rhs: Self) -> Self::Output {
+    fn mul(self, rhs: Positive<U>) -> Self::Output {
         // - self is positive
         // - rhs is positive
         // - multiplying two positive integers will result in a positive integer
@@ -154,11 +154,11 @@ where
     }
 }
 
-impl<T> ops::AddAssign<Self> for Positive<T>
+impl<T, U> ops::AddAssign<Positive<U>> for Positive<T>
 where
-    T: ops::AddAssign<T>,
+    T: ops::AddAssign<U>,
 {
-    fn add_assign(&mut self, rhs: Self) {
+    fn add_assign(&mut self, rhs: Positive<U>) {
         // - self is positive
         // - rhs is positive
         // - adding two positive integers will result in a positive integer
@@ -166,11 +166,11 @@ where
     }
 }
 
-impl<T> ops::MulAssign<Self> for Positive<T>
+impl<T, U> ops::MulAssign<Positive<U>> for Positive<T>
 where
-    T: ops::MulAssign<T>,
+    T: ops::MulAssign<U>,
 {
-    fn mul_assign(&mut self, rhs: Self) {
+    fn mul_assign(&mut self, rhs: Positive<U>) {
         // - self is positive
         // - rhs is positive
         // - multiplying two positive integers will result in a positive integer
@@ -178,14 +178,15 @@ where
     }
 }
 
-//////////////////////////////////////
-// Positive<UnsignedT> +  UnsignedT //
-// Positive<UnsignedT> += UnsignedT //
-//////////////////////////////////////
+//////////////////////////////
+// Positive<T> +  UnsignedT //
+// Positive<T> += UnsignedT //
+//////////////////////////////
 
-impl<UnsignedT> ops::Add<UnsignedT> for Positive<UnsignedT>
+impl<T, UnsignedT> ops::Add<UnsignedT> for Positive<T>
 where
-    UnsignedT: num::Unsigned + ops::Add<UnsignedT, Output = UnsignedT>,
+    UnsignedT: num::Unsigned,
+    T: ops::Add<UnsignedT, Output = T>,
 {
     type Output = Self;
 
@@ -198,11 +199,12 @@ where
     }
 }
 
-impl<T> ops::AddAssign<T> for Positive<T>
+impl<T, UnsignedT> ops::AddAssign<UnsignedT> for Positive<T>
 where
-    T: num::Unsigned + ops::AddAssign<T>,
+    UnsignedT: num::Unsigned,
+    T: ops::AddAssign<UnsignedT>,
 {
-    fn add_assign(&mut self, rhs: T) {
+    fn add_assign(&mut self, rhs: UnsignedT) {
         // - self is positive
         // - rhs is positive or zero
         // - adding two positive integers will result in a positive integer
