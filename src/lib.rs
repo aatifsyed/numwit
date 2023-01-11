@@ -1,6 +1,10 @@
 /// Witness types for numbers.
 use std::{fmt, ops};
 
+/////////////////
+// Positive<T> //
+/////////////////
+
 /// A guarantee that `T > 0`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, derive_more::AsRef)]
 #[repr(transparent)]
@@ -46,6 +50,56 @@ impl<T: fmt::Display> fmt::Display for NotPositive<T> {
 }
 
 impl<T: fmt::Display + fmt::Debug> std::error::Error for NotPositive<T> {}
+
+/////////////////
+// Negative<T> //
+/////////////////
+
+/// A guarantee that `T < 0`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, derive_more::AsRef)]
+#[repr(transparent)]
+pub struct Negative<T>(T);
+
+impl<T> Negative<T> {
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+    pub fn new_unchecked(value: T) -> Self {
+        Self(value)
+    }
+    pub fn map_unchecked(self, mut f: impl FnMut(T) -> T) -> Self {
+        Self(f(self.0))
+    }
+    pub fn mut_unchecked(&mut self) -> &mut T {
+        &mut self.0
+    }
+}
+
+impl<T> Negative<T>
+where
+    T: num::Zero + PartialOrd,
+{
+    pub fn new(value: T) -> Result<Self, NotNegative<T>> {
+        match value < T::zero() {
+            true => Ok(Self(value)),
+            false => Err(NotNegative(value)),
+        }
+    }
+    pub fn map(self, mut f: impl FnMut(T) -> T) -> Result<Self, NotNegative<T>> {
+        Self::new(f(self.0))
+    }
+}
+
+#[derive(Debug)]
+pub struct NotNegative<T>(pub T);
+
+impl<T: fmt::Display> fmt::Display for NotNegative<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!("The value {} was not negative", self.0))
+    }
+}
+
+impl<T: fmt::Display + fmt::Debug> std::error::Error for NotNegative<T> {}
 
 ////////////////////////////////
 // Positive<T> +  Positive<T> //
