@@ -135,7 +135,7 @@ where
     fn add(self, rhs: Positive<U>) -> Self::Output {
         // - self is positive
         // - rhs is positive
-        // - adding two positive integers will result in a positive integer
+        // - adding two positive numbers will result in a positive number
         Self::new_unchecked(self.0 + rhs.0)
     }
 }
@@ -149,7 +149,7 @@ where
     fn mul(self, rhs: Positive<U>) -> Self::Output {
         // - self is positive
         // - rhs is positive
-        // - multiplying two positive integers will result in a positive integer
+        // - multiplying two positive numbers will result in a positive number
         Self::new_unchecked(self.0 * rhs.0)
     }
 }
@@ -161,7 +161,7 @@ where
     fn add_assign(&mut self, rhs: Positive<U>) {
         // - self is positive
         // - rhs is positive
-        // - adding two positive integers will result in a positive integer
+        // - adding two positive numbers will result in a positive number
         self.mut_unchecked().add_assign(rhs.into_inner());
     }
 }
@@ -173,8 +173,40 @@ where
     fn mul_assign(&mut self, rhs: Positive<U>) {
         // - self is positive
         // - rhs is positive
-        // - multiplying two positive integers will result in a positive integer
+        // - multiplying two positive numbers will result in a positive number
         self.mut_unchecked().mul_assign(rhs.into_inner())
+    }
+}
+
+////////////////////////////////
+// Positive<T> -  Negative<U> //
+// Positive<T> -= Negative<U> //
+////////////////////////////////
+impl<T, U> ops::Sub<Negative<U>> for Positive<T>
+where
+    T: ops::Sub<U, Output = T>,
+{
+    type Output = Positive<T>;
+
+    fn sub(self, rhs: Negative<U>) -> Self::Output {
+        // - self is positive
+        // - rhs is negative
+        // - subtracting a negative number is the same as adding a positive number
+        // - adding two positive numbers will result in a positive number
+        Self::new_unchecked(self.0 - rhs.0)
+    }
+}
+
+impl<T, U> ops::SubAssign<Negative<U>> for Positive<T>
+where
+    T: ops::SubAssign<U>,
+{
+    fn sub_assign(&mut self, rhs: Negative<U>) {
+        // - self is positive
+        // - rhs is negative
+        // - subtracting a negative number is the same as adding a positive number
+        // - adding two positive numbers will result in a positive number
+        self.mut_unchecked().sub_assign(rhs.0)
     }
 }
 
@@ -193,8 +225,8 @@ where
     fn add(self, rhs: UnsignedT) -> Self::Output {
         // - self is positive
         // - rhs is positive or zero
-        // - adding two positive integers will result in a positive integer
-        // - adding zero to a positive integer will result in a positive integer
+        // - adding two positive numbers will result in a positive number
+        // - adding zero to a positive number will result in a positive number
         Self::new_unchecked(self.0 + rhs)
     }
 }
@@ -207,8 +239,8 @@ where
     fn add_assign(&mut self, rhs: UnsignedT) {
         // - self is positive
         // - rhs is positive or zero
-        // - adding two positive integers will result in a positive integer
-        // - adding zero to a positive integer will result in a positive integer
+        // - adding two positive numbers will result in a positive number
+        // - adding zero to a positive number will result in a positive number
         self.mut_unchecked().add_assign(rhs)
     }
 }
