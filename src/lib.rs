@@ -112,6 +112,31 @@ where
     }
 }
 
+impl<'de, T> serde::Deserialize<'de> for Positive<T>
+where
+    T: serde::Deserialize<'de> + num::Zero + PartialOrd + fmt::Display,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let t = T::deserialize(deserializer)?;
+        Self::new(t).map_err(serde::de::Error::custom)
+    }
+}
+
+impl<T> serde::Serialize for Positive<T>
+where
+    T: serde::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.as_ref().serialize(serializer)
+    }
+}
+
 /////////////////
 // Negative<T> //
 /////////////////
@@ -171,6 +196,31 @@ where
 {
     pub fn one() -> Self {
         Self::new_unchecked(-T::one())
+    }
+}
+
+impl<'de, T> serde::Deserialize<'de> for Negative<T>
+where
+    T: serde::Deserialize<'de> + num::Zero + PartialOrd + fmt::Display,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let t = T::deserialize(deserializer)?;
+        Self::new(t).map_err(serde::de::Error::custom)
+    }
+}
+
+impl<T> serde::Serialize for Negative<T>
+where
+    T: serde::Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.as_ref().serialize(serializer)
     }
 }
 
