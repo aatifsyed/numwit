@@ -44,6 +44,9 @@ impl<T> Positive<T> {
     pub fn into_inner(self) -> T {
         self.0
     }
+    pub fn inner(&self) -> &T {
+        self.as_ref()
+    }
     pub fn new_unchecked(value: T) -> Self {
         Self(value)
     }
@@ -121,6 +124,9 @@ pub struct Negative<T>(T);
 impl<T> Negative<T> {
     pub fn into_inner(self) -> T {
         self.0
+    }
+    pub fn inner(&self) -> &T {
+        self.as_ref()
     }
     pub fn new_unchecked(value: T) -> Self {
         Self(value)
