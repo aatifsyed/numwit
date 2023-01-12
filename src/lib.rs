@@ -385,7 +385,15 @@ where
     }
 }
 
-// TODO(aatifsyed): assignable
+impl<LhsT, RhsT> ops::SubAssign<RhsT> for Negative<LhsT>
+where
+    LhsT: ops::SubAssign<RhsT>,
+    RhsT: num::Unsigned,
+{
+    fn sub_assign(&mut self, rhs: RhsT) {
+        self.mut_unchecked().sub_assign(rhs)
+    }
+}
 
 // | Operation | LHS        | RHS             | Output     | Assignable? |
 // | --------- | ---------- | --------------- | ---------- | ----------- |
@@ -580,7 +588,15 @@ where
     }
 }
 
-// TODO(aatifsyed): assignable
+impl<LhsT, RhsT> ops::DivAssign<RhsT> for Positive<LhsT>
+where
+    LhsT: ops::DivAssign<RhsT>,
+    RhsT: num::Unsigned,
+{
+    fn div_assign(&mut self, rhs: RhsT) {
+        self.mut_unchecked().div_assign(rhs)
+    }
+}
 
 // | Operation | LHS        | RHS             | Output     | Assignable? |
 // | --------- | ---------- | --------------- | ---------- | ----------- |
@@ -597,7 +613,15 @@ where
     }
 }
 
-// TODO(aatifsyed): assignable
+impl<LhsT, RhsT> ops::DivAssign<RhsT> for Negative<LhsT>
+where
+    LhsT: ops::DivAssign<RhsT>,
+    RhsT: num::Unsigned,
+{
+    fn div_assign(&mut self, rhs: RhsT) {
+        self.mut_unchecked().div_assign(rhs)
+    }
+}
 
 //////////////
 // Negation //
