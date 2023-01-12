@@ -60,6 +60,15 @@ where
     }
 }
 
+impl<T> num::One for Positive<T>
+where
+    T: num::One,
+{
+    fn one() -> Self {
+        Self::new_unchecked(T::one())
+    }
+}
+
 #[derive(Debug)]
 pub struct NotPositive<T>(pub T);
 
@@ -116,6 +125,15 @@ where
     }
     pub fn map(self, mut f: impl FnMut(T) -> T) -> Result<Self, NotNegative<T>> {
         Self::new(f(self.0))
+    }
+}
+
+impl<T> Negative<T>
+where
+    T: num::One + ops::Neg<Output = T>,
+{
+    pub fn one() -> Self {
+        Self::new_unchecked(-T::one())
     }
 }
 
