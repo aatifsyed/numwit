@@ -1,4 +1,4 @@
-//! Witness types for numbers being [`Positive`] or [`Negative`].
+//! Witness types and operations for numbers which are [`Positive`] or [`Negative`], but not zero.
 //!
 //! | Operation | LHS        | RHS             | Output     | Assignable? |
 //! | --------- | ---------- | --------------- | ---------- | ----------- |
