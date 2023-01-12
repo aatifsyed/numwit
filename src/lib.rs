@@ -1,4 +1,24 @@
-/// Witness types for numbers.
+//! Witness types for numbers being [`Positive`] or [`Negative`].
+//!
+//! | Operation | LHS | RHS | Output | Assignable? |
+//! |-----------|-----|-----|--------|-------------|
+//! | +         | +   | +   | +      | Y           |
+//! |           | -   | -   | -      | Y           |
+//! |           | +   | -   | ?      | N           |
+//! |           | -   | +   | ?      | N           |
+//! | -         | +   | +   | ?      | N           |
+//! |           | -   | -   | ?      | N           |
+//! |           | +   | -   | +      | Y           |
+//! |           | -   | +   | -      | Y           |
+//! | *         | +   | +   | +      | Y           |
+//! |           | -   | -   | +      | N           |
+//! |           | +   | -   | -      | N           |
+//! |           | -   | +   | -      | Y           |
+//! | /         | +   | +   | +      | Y           |
+//! |           | -   | -   | +      | N           |
+//! |           | +   | -   | -      | N           |
+//! |           | -   | +   | -      | Y           |
+
 use std::{fmt, ops};
 
 /////////////////
@@ -119,128 +139,320 @@ where
     }
 }
 
-////////////////////////////////
-// Positive<T> +  Positive<U> //
-// Positive<T> *  Positive<U> //
-// Positive<T> += Positive<U> //
-// Positive<T> *= Positive<U> //
-////////////////////////////////
+// | Operation | LHS | RHS | Output |
+// |-----------|-----|-----|--------|
+// | +         | +   | +   | +      |
+// |           | -   | -   | -      |
+// |           | +   | -   | ?      |
+// |           | -   | +   | ?      |
 
-impl<T, U> ops::Add<Positive<U>> for Positive<T>
+impl<LhsT, RhsT, OutT> ops::Add<Positive<RhsT>> for Positive<LhsT>
 where
-    T: ops::Add<U, Output = T>,
+    LhsT: ops::Add<RhsT, Output = OutT>,
 {
-    type Output = Self;
+    type Output = Positive<OutT>;
 
-    fn add(self, rhs: Positive<U>) -> Self::Output {
-        // - self is positive
-        // - rhs is positive
-        // - adding two positive numbers will result in a positive number
-        Self::new_unchecked(self.0 + rhs.0)
+    fn add(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 + rhs.0)
     }
 }
 
-impl<T, U> ops::Mul<Positive<U>> for Positive<T>
+impl<LhsT, RhsT, OutT> ops::Add<Negative<RhsT>> for Negative<LhsT>
 where
-    T: ops::Mul<U, Output = T>,
+    LhsT: ops::Add<RhsT, Output = OutT>,
 {
-    type Output = Self;
+    type Output = Negative<OutT>;
 
-    fn mul(self, rhs: Positive<U>) -> Self::Output {
-        // - self is positive
-        // - rhs is positive
-        // - multiplying two positive numbers will result in a positive number
-        Self::new_unchecked(self.0 * rhs.0)
+    fn add(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 + rhs.0)
     }
 }
 
-impl<T, U> ops::AddAssign<Positive<U>> for Positive<T>
+impl<LhsT, RhsT, OutT> ops::Add<Negative<RhsT>> for Positive<LhsT>
 where
-    T: ops::AddAssign<U>,
+    LhsT: ops::Add<RhsT, Output = OutT>,
 {
-    fn add_assign(&mut self, rhs: Positive<U>) {
-        // - self is positive
-        // - rhs is positive
-        // - adding two positive numbers will result in a positive number
-        self.mut_unchecked().add_assign(rhs.into_inner());
+    type Output = OutT;
+
+    fn add(self, rhs: Negative<RhsT>) -> Self::Output {
+        self.0 + rhs.0
     }
 }
 
-impl<T, U> ops::MulAssign<Positive<U>> for Positive<T>
+impl<LhsT, RhsT, OutT> ops::Add<Positive<RhsT>> for Negative<LhsT>
 where
-    T: ops::MulAssign<U>,
+    LhsT: ops::Add<RhsT, Output = OutT>,
 {
-    fn mul_assign(&mut self, rhs: Positive<U>) {
-        // - self is positive
-        // - rhs is positive
-        // - multiplying two positive numbers will result in a positive number
-        self.mut_unchecked().mul_assign(rhs.into_inner())
+    type Output = OutT;
+
+    fn add(self, rhs: Positive<RhsT>) -> Self::Output {
+        self.0 + rhs.0
     }
 }
 
-////////////////////////////////
-// Positive<T> -  Negative<U> //
-// Positive<T> -= Negative<U> //
-////////////////////////////////
-impl<T, U> ops::Sub<Negative<U>> for Positive<T>
-where
-    T: ops::Sub<U, Output = T>,
-{
-    type Output = Positive<T>;
+// | Operation | LHS | RHS | Output |
+// |-----------|-----|-----|--------|
+// | -         | +   | +   | ?      |
+// |           | -   | -   | ?      |
+// |           | +   | -   | +      |
+// |           | -   | +   | -      |
 
-    fn sub(self, rhs: Negative<U>) -> Self::Output {
-        // - self is positive
-        // - rhs is negative
-        // - subtracting a negative number is the same as adding a positive number
-        // - adding two positive numbers will result in a positive number
-        Self::new_unchecked(self.0 - rhs.0)
+impl<LhsT, RhsT, OutT> ops::Sub<Positive<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Sub<RhsT, Output = OutT>,
+{
+    type Output = OutT;
+
+    fn sub(self, rhs: Positive<RhsT>) -> Self::Output {
+        self.0 - rhs.0
     }
 }
 
-impl<T, U> ops::SubAssign<Negative<U>> for Positive<T>
+impl<LhsT, RhsT, OutT> ops::Sub<Negative<RhsT>> for Negative<LhsT>
 where
-    T: ops::SubAssign<U>,
+    LhsT: ops::Sub<RhsT, Output = OutT>,
 {
-    fn sub_assign(&mut self, rhs: Negative<U>) {
-        // - self is positive
-        // - rhs is negative
-        // - subtracting a negative number is the same as adding a positive number
-        // - adding two positive numbers will result in a positive number
+    type Output = OutT;
+
+    fn sub(self, rhs: Negative<RhsT>) -> Self::Output {
+        self.0 - rhs.0
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Sub<Negative<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Sub<RhsT, Output = OutT>,
+{
+    type Output = Positive<OutT>;
+
+    fn sub(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 - rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Sub<Positive<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::Sub<RhsT, Output = OutT>,
+{
+    type Output = Negative<OutT>;
+
+    fn sub(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 - rhs.0)
+    }
+}
+
+// | Operation | LHS | RHS | Output |
+// |-----------|-----|-----|--------|
+// | *         | +   | +   | +      |
+// |           | -   | -   | +      |
+// |           | +   | -   | -      |
+// |           | -   | +   | -      |
+
+impl<LhsT, RhsT, OutT> ops::Mul<Positive<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Mul<RhsT, Output = OutT>,
+{
+    type Output = Positive<OutT>;
+
+    fn mul(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 * rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Mul<Negative<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::Mul<RhsT, Output = OutT>,
+{
+    type Output = Positive<OutT>;
+
+    fn mul(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 * rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Mul<Negative<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Mul<RhsT, Output = OutT>,
+{
+    type Output = Negative<OutT>;
+
+    fn mul(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 * rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Mul<Positive<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::Mul<RhsT, Output = OutT>,
+{
+    type Output = Negative<OutT>;
+
+    fn mul(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 * rhs.0)
+    }
+}
+
+// | Operation | LHS | RHS | Output |
+// |-----------|-----|-----|--------|
+// | /         | +   | +   | +      |
+// |           | -   | -   | +      |
+// |           | +   | -   | -      |
+// |           | -   | +   | -      |
+
+impl<LhsT, RhsT, OutT> ops::Div<Positive<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Div<RhsT, Output = OutT>,
+{
+    type Output = Positive<OutT>;
+
+    fn div(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 / rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Div<Negative<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::Div<RhsT, Output = OutT>,
+{
+    type Output = Positive<OutT>;
+
+    fn div(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 / rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Div<Negative<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::Div<RhsT, Output = OutT>,
+{
+    type Output = Negative<OutT>;
+
+    fn div(self, rhs: Negative<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 / rhs.0)
+    }
+}
+
+impl<LhsT, RhsT, OutT> ops::Div<Positive<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::Div<RhsT, Output = OutT>,
+{
+    type Output = Negative<OutT>;
+
+    fn div(self, rhs: Positive<RhsT>) -> Self::Output {
+        Self::Output::new_unchecked(self.0 / rhs.0)
+    }
+}
+
+//////////////
+// Negation //
+//////////////
+
+impl<T, U> ops::Neg for Positive<T>
+where
+    T: ops::Neg<Output = U>,
+{
+    type Output = Negative<U>;
+
+    fn neg(self) -> Self::Output {
+        Self::Output::new_unchecked(-self.0)
+    }
+}
+
+impl<T, U> ops::Neg for Negative<T>
+where
+    T: ops::Neg<Output = U>,
+{
+    type Output = Positive<U>;
+
+    fn neg(self) -> Self::Output {
+        Self::Output::new_unchecked(-self.0)
+    }
+}
+
+///////////////
+// AddAssign //
+///////////////
+
+impl<LhsT, RhsT> ops::AddAssign<Positive<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::AddAssign<RhsT>,
+{
+    fn add_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().add_assign(rhs.0)
+    }
+}
+
+impl<LhsT, RhsT> ops::AddAssign<Negative<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::AddAssign<RhsT>,
+{
+    fn add_assign(&mut self, rhs: Negative<RhsT>) {
+        self.mut_unchecked().add_assign(rhs.0)
+    }
+}
+
+///////////////
+// SubAssign //
+///////////////
+
+impl<LhsT, RhsT> ops::SubAssign<Negative<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::SubAssign<RhsT>,
+{
+    fn sub_assign(&mut self, rhs: Negative<RhsT>) {
         self.mut_unchecked().sub_assign(rhs.0)
     }
 }
 
-//////////////////////////////
-// Positive<T> +  UnsignedT //
-// Positive<T> += UnsignedT //
-//////////////////////////////
-
-impl<T, UnsignedT> ops::Add<UnsignedT> for Positive<T>
+impl<LhsT, RhsT> ops::SubAssign<Positive<RhsT>> for Negative<LhsT>
 where
-    UnsignedT: num::Unsigned,
-    T: ops::Add<UnsignedT, Output = T>,
+    LhsT: ops::SubAssign<RhsT>,
 {
-    type Output = Self;
-
-    fn add(self, rhs: UnsignedT) -> Self::Output {
-        // - self is positive
-        // - rhs is positive or zero
-        // - adding two positive numbers will result in a positive number
-        // - adding zero to a positive number will result in a positive number
-        Self::new_unchecked(self.0 + rhs)
+    fn sub_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().sub_assign(rhs.0)
     }
 }
 
-impl<T, UnsignedT> ops::AddAssign<UnsignedT> for Positive<T>
+///////////////
+// MulAssign //
+///////////////
+
+impl<LhsT, RhsT> ops::MulAssign<Positive<RhsT>> for Positive<LhsT>
 where
-    UnsignedT: num::Unsigned,
-    T: ops::AddAssign<UnsignedT>,
+    LhsT: ops::MulAssign<RhsT>,
 {
-    fn add_assign(&mut self, rhs: UnsignedT) {
-        // - self is positive
-        // - rhs is positive or zero
-        // - adding two positive numbers will result in a positive number
-        // - adding zero to a positive number will result in a positive number
-        self.mut_unchecked().add_assign(rhs)
+    fn mul_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().mul_assign(rhs.0)
+    }
+}
+
+impl<LhsT, RhsT> ops::MulAssign<Positive<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::MulAssign<RhsT>,
+{
+    fn mul_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().mul_assign(rhs.0)
+    }
+}
+
+///////////////
+// DivAssign //
+///////////////
+
+impl<LhsT, RhsT> ops::DivAssign<Positive<RhsT>> for Positive<LhsT>
+where
+    LhsT: ops::DivAssign<RhsT>,
+{
+    fn div_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().div_assign(rhs.0)
+    }
+}
+
+impl<LhsT, RhsT> ops::DivAssign<Positive<RhsT>> for Negative<LhsT>
+where
+    LhsT: ops::DivAssign<RhsT>,
+{
+    fn div_assign(&mut self, rhs: Positive<RhsT>) {
+        self.mut_unchecked().div_assign(rhs.0)
     }
 }
