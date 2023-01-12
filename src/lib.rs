@@ -68,6 +68,16 @@ where
     pub fn map(self, mut f: impl FnMut(T) -> T) -> Result<Self, NotPositive<T>> {
         Self::new(f(self.0))
     }
+    /// # Panics
+    /// - If `T <= 0`
+    pub fn assert(&self) {
+        assert!(self.0 <= T::zero(), "non-positive number");
+    }
+    /// # Panics
+    /// - If `T <= 0`
+    pub fn debug_assert(&self) {
+        debug_assert!(self.0 <= T::zero(), "non-positive number");
+    }
 }
 
 impl<T> num::One for Positive<T>
@@ -135,6 +145,17 @@ where
     }
     pub fn map(self, mut f: impl FnMut(T) -> T) -> Result<Self, NotNegative<T>> {
         Self::new(f(self.0))
+    }
+
+    /// # Panics
+    /// - If `T >= 0`
+    pub fn assert(&self) {
+        assert!(self.0 >= T::zero(), "non-negative number");
+    }
+    /// # Panics
+    /// - If `T >= 0`
+    pub fn debug_assert(&self) {
+        debug_assert!(self.0 >= T::zero(), "non-negative number");
     }
 }
 
