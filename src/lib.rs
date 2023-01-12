@@ -26,6 +26,8 @@
 //! |           | `Negative` | `Positive`      | `Negative` | Yes         |
 //! |           | `Positive` | `impl Unsigned` | `Positive` | Yes         |
 //! |           | `Negative` | `impl Unsigned` | `Negative` | Yes         |
+//! | Neg       | `Positive` |                 | `Negative` |             |
+//! |           | `Negative` |                 | `Positive` |             |
 
 use std::{fmt, ops};
 
@@ -254,7 +256,15 @@ where
     }
 }
 
-// TODO(aatifsyed): assignable
+impl<LhsT, RhsT> ops::AddAssign<RhsT> for Positive<LhsT>
+where
+    LhsT: ops::AddAssign<RhsT>,
+    RhsT: num::Unsigned,
+{
+    fn add_assign(&mut self, rhs: RhsT) {
+        self.mut_unchecked().add_assign(rhs)
+    }
+}
 
 // | Operation | LHS        | RHS             | Output     | Assignable? |
 // | --------- | ---------- | --------------- | ---------- | ----------- |
